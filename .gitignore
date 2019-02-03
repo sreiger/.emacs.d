@@ -1,0 +1,11 @@
+# GNU Emacs
+*.elc
+*~
+.abbrev_def
+/anaconda-mode/
+/auto-save-list/
+/backups/
+/elpa/
+config.el
+custom.el
+history

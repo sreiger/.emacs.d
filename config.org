@@ -2,7 +2,6 @@
 #+TITLE: GNU Emacs Configuration
 
 * Emacs Initialization
-
 ** Package Sources
 
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -67,19 +66,26 @@ user with the UI, I add the generated code in a separate file.
 
 ** Theme
 
-I like the light on dark because I find it to be more restful.
-
 #+BEGIN_SRC emacs-lisp :tangle yes
-  (use-package nord-theme
+  (use-package zenburn-theme
+    :ensure t)
+
+  (use-package color-theme-sanityinc-tomorrow
+    :ensure t
     :config
-    (add-to-list 'custom-theme-load-path (expand-file-name "~/.emacs.d/themes"))
-    (load-theme 'nord t))
+    (progn
+      (require 'color-theme-sanityinc-tomorrow)
+      (color-theme-sanityinc-tomorrow--define-theme eighties)
+      ))
 
   (use-package smart-mode-line
     :defer 0.1
     :custom (sml/theme 'respectful)
     :config (sml/setup))
+
 #+END_SRC
+
+I like the light on dark because I find it to be more restful.
 
 ** Turn off mouse interface
 
@@ -120,7 +126,6 @@ In order to have the user's home as clean as possible, I follow the
 #+END_SRC
 
 * Languages
-
 ** CSS
 
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -138,7 +143,6 @@ Powerful minor mode to produce HTML from CSS-like selector.
     :delight
     :hook (sgml-mode css-mode web-mode))
 #+END_SRC
-
 
 ** CSV
 
@@ -249,7 +253,6 @@ Makes it easy to jump to function references or definitions.
   (use-package xref-js2 :defer 5)
 #+END_SRC
 
-
 ** JSON
 
 #+BEGIN_SRC emacs-lisp :tangle yes
@@ -262,7 +265,6 @@ Makes it easy to jump to function references or definitions.
       (when (eq major-mode 'json-mode)
         (json-pretty-print-buffer))))
 #+END_SRC
-
 
 ** LaTeX
 
@@ -305,8 +307,6 @@ I want a TeX engine that can deal with Unicode and use any font I like.
 #+END_SRC
 
 
-
-
 ** SQL
 
 =sql-indent= gives me the possibility to easily manage =.sql= files.
@@ -333,9 +333,37 @@ I want a TeX engine that can deal with Unicode and use any font I like.
       (company-mode +1))
     :hook (before-save . tide-format-before-save))
 #+END_SRC
+** Golang
+
+Go-mode provides basic language support, and gofmt will be called on each save
+to keep code tidy, use eldoc to display documentation.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+
+  (use-package go-mode
+    :ensure t
+    :bind("M-p" . 'compile)
+    :init
+    :config
+    (setq gofmt-command "goimports")
+    (add-hook 'go-mode-hook
+	      (lambda ()
+		(add-hook 'before-save-hook 'gofmt-before-save)
+		(setq tab-width 4)
+		(set indent-tabs-mode 1))))
+
+#+END_SRC
+** Rest Client
+
+This is a tool to manually explore and test HTTP REST webservices.
+
+#+BEGIN_SRC emacs-lisp :tangle yes
+
+(use-package restclient
+	:ensure t)
+#+END_SRC
 
 * Advanced Configuration
-
 ** Alert
 
 Most packages use =alerts= to make notifications with =libnotify=. Don't forget
@@ -387,7 +415,6 @@ I use =company= with =company-box= that allows a company front-end with icons.
      :delight
      :hook (company-mode . company-box-mode))
 #+END_SRC
-
 
 ** Buffers
 
@@ -460,7 +487,6 @@ The code below, executes =org-babel-tangle= asynchronously when
               (message "ERROR: %s as tangle failed." ,org-file)))))))
 #+END_SRC
 
-
 ** Spelling
 
 *** Abbreviations
@@ -506,7 +532,6 @@ enables spell checking on-the-fly in GNU Emacs.
     (ispell-silently-savep t))
 #+END_SRC
 
-
 ** History
 
 Provides the ability to have commands and their history saved so that whenever
@@ -528,27 +553,26 @@ radical function, it is part of a good user experience.
     :config (savehist-mode 1))
 #+END_SRC
 
-** Rest Client
+** Swiper
 
-This is a tool to manually explore and test HTTP REST webservices.
-
-#+BEGIN_SRC emacs-lisp :tangle yes
-
-(use-package restclient
-	:ensure t)
-#+END_SRC
-
-** Golang
-
-Go-mode provides basic language support, and gofmt will be called on each save
-to keep code tidy, use eldoc to display documentation.
+Do you enjoy finding stuff the hard way ie. C-s'ing all over the place. Why not swipe it.
 
 #+BEGIN_SRC emacs-lisp :tangle yes
 
-(use-package go-mode
+  (use-package swiper
     :ensure t
+    :bind (("C-s" . swiper)
+	   ("C-r" . swiper)
+	   ("C-c C-r" . ivy-resume)
+	   ("M-x" . counsel-M-x)
+	   ("C-x C-f" . counsel-find-file))
     :config
-    (add-hook 'before-save-hook 'gofmt-before-save))
+    (progn
+      (ivy-mode 1)
+      (setq ivy-use-virtual-buffers t)
+      (setq ivy-display-style 'fancy)
+      (define-key read-expression-map (kbd "C-r") 'counsel-expression-history)
+      ))
+
 
 #+END_SRC
-
